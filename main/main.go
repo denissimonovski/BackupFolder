@@ -26,7 +26,7 @@ func CopyDir(src string, dst string) (err error) {
 		return err
 	}
 	if !si.IsDir() {
-		return fmt.Errorf("source is not a directory")
+		return fmt.Errorf("source-ot ne e folder")
 	}
 
 	_, err = os.Stat(dst)
