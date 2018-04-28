@@ -57,7 +57,7 @@ func CopyDir(src string, dst string) (err error) {
 				return
 			}
 		} else {
-			// Skip symlinks.
+			// Ne kopiraj symlinks.
 			if entry.Mode()&os.ModeSymlink != 0 {
 				continue
 			}
