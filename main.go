@@ -32,7 +32,9 @@ func copy_dir(dirsource, dirdest string) (err error) {
 		fmt.Println(err)
 	}
 	if !source_info.IsDir() {
+		fmt.Printf("Start na kopiranje na %s        ", dirsource)
 		copy_file(dirsource, dirdest)
+		fmt.Printf("Zavrseno kopiranje\n")
 	}
 
 	_, err = os.Stat(dirdest)
@@ -59,6 +61,7 @@ func copy_dir(dirsource, dirdest string) (err error) {
 			}
 		} else {
 			if file.Mode()&os.ModeSymlink == os.ModeSymlink {
+				fmt.Println("Shortcut-ot ", file.Name(), " ne se kopira")
 				continue
 			}
 			err = copy_file(source_pateka, dest_pateka)
@@ -85,7 +88,9 @@ func copy_file(src, dst string) (err error) {
 			err = e
 		}
 	}()
+	fmt.Printf("Se kopira: %s ==> %s       ", src, dst)
 	_, err = io.Copy(dest_file, source_file)
+	fmt.Printf("Zavrseno kopiranje\n")
 	if err != nil {
 		return
 	}
