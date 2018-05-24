@@ -2,111 +2,104 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
 	"os"
+	"path/filepath"
 	"io/ioutil"
 	"io"
 )
 
 func main() {
-	var a string
-	err := CopyDir("/Source_za_backup","/root/test/Dest_za_backup/Source")
+	var source, dest string
+	fmt.Println("Vnesi source direktorium")
+	fmt.Scan(&source)
+	fmt.Println("Vnesi destinaciski direktorium")
+	fmt.Scan(&dest)
+	cist_source := filepath.Clean(source)
+	cist_dest := filepath.Clean(dest)
+	err := copy_dir(cist_source, cist_dest)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Scan(&a)
+	fmt.Println("Zavrseno kopiranje")
 }
 
-func CopyDir(src string, dst string) (err error) {
-	src = filepath.Clean(src)
-	dst = filepath.Clean(dst)
+func copy_dir(dirsource, dirdest string) (err error) {
+	dirsource = filepath.Clean(dirsource)
+	dirdest = filepath.Clean(dirdest)
 
-	si, err := os.Stat(src)
+	source_info, err := os.Stat(dirsource)
 	if err != nil {
-		return err
+		fmt.Println(err)
 	}
-	if !si.IsDir() {
-		return fmt.Errorf("source-ot ne e folder")
-	}
-
-	_, err = os.Stat(dst)
-	if err != nil && !os.IsNotExist(err) {
-		return
-	}
-	if err == nil {
-		os.RemoveAll("/root/test/Dest_za_backup/Source")
+	if !source_info.IsDir() {
+		copy_file(dirsource, dirdest)
 	}
 
-	err = os.MkdirAll(dst, si.Mode())
-	if err != nil {
-		return
+	_, err = os.Stat(dirdest)
+	if os.IsNotExist(err) {
+		err = os.Mkdir(dirdest, source_info.Mode())
+		if err != nil {
+			return
+		}
 	}
 
-	entries, err := ioutil.ReadDir(src)
+	struktura, err := ioutil.ReadDir(dirsource)
 	if err != nil {
 		return
 	}
 
-	for _, entry := range entries {
-		srcPath := filepath.Join(src, entry.Name())
-		dstPath := filepath.Join(dst, entry.Name())
+	for _, file := range struktura {
+		source_pateka := filepath.Join(dirsource, file.Name())
+		dest_pateka := filepath.Join(dirdest, file.Name())
 
-		if entry.IsDir() {
-			err = CopyDir(srcPath, dstPath)
+		if file.IsDir() {
+			err = copy_dir(source_pateka, dest_pateka)
 			if err != nil {
 				return
 			}
 		} else {
-			// Ne kopiraj symlinks.
-			if entry.Mode()&os.ModeSymlink != 0 {
+			if file.Mode()&os.ModeSymlink == os.ModeSymlink {
 				continue
 			}
-
-			err = CopyFile(srcPath, dstPath)
+			err = copy_file(source_pateka, dest_pateka)
 			if err != nil {
 				return
 			}
 		}
 	}
-
 	return
 }
 
-func CopyFile(src, dst string) (err error) {
-	in, err := os.Open(src)
+func copy_file(src, dst string) (err error) {
+	source_file, err := os.Open(src)
+	defer source_file.Close()
 	if err != nil {
 		return
 	}
-	defer in.Close()
-
-	out, err := os.Create(dst)
+	dest_file, err := os.Create(dst)
 	if err != nil {
 		return
 	}
 	defer func() {
-		if e := out.Close(); e != nil {
+		if e := dest_file.Close(); e != nil {
 			err = e
 		}
 	}()
-
-	_, err = io.Copy(out, in)
+	_, err = io.Copy(dest_file, source_file)
 	if err != nil {
 		return
 	}
-
-	err = out.Sync()
+	err = dest_file.Sync()
 	if err != nil {
 		return
 	}
-
-	si, err := os.Stat(src)
+	source_info, err := os.Stat(src)
 	if err != nil {
 		return
 	}
-	err = os.Chmod(dst, si.Mode())
+	err = os.Chmod(dst, source_info.Mode())
 	if err != nil {
 		return
 	}
-
 	return
 }
