@@ -32,9 +32,7 @@ func copy_dir(dirsource, dirdest string) (err error) {
 		fmt.Println(err)
 	}
 	if !source_info.IsDir() {
-		fmt.Printf("Start na kopiranje na %s        ", dirsource)
 		copy_file(dirsource, dirdest)
-		fmt.Printf("Zavrseno kopiranje\n")
 	}
 
 	_, err = os.Stat(dirdest)
