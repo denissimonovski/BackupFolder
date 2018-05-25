@@ -10,34 +10,38 @@ import (
 
 func main() {
 	var source, dest string
+
 	fmt.Println("Vnesi source direktorium")
 	fmt.Scan(&source)
 	fmt.Println("Vnesi destinaciski direktorium")
 	fmt.Scan(&dest)
-	cist_source := filepath.Clean(source)
-	cist_dest := filepath.Clean(dest)
-	err := copy_dir(cist_source, cist_dest)
+
+	cistSource := filepath.Clean(source)
+	cistDest := filepath.Clean(dest)
+
+	err := copyDir(cistSource, cistDest)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("Zavrseno kopiranje")
 }
 
-func copy_dir(dirsource, dirdest string) (err error) {
+func copyDir(dirsource, dirdest string) (err error) {
 	dirsource = filepath.Clean(dirsource)
 	dirdest = filepath.Clean(dirdest)
 
-	source_info, err := os.Stat(dirsource)
+	sourceInfo, err := os.Stat(dirsource)
 	if err != nil {
 		fmt.Println(err)
 	}
-	if !source_info.IsDir() {
-		copy_file(dirsource, dirdest)
+	if !sourceInfo.IsDir() {
+		err = copyFile(dirsource, filepath.Join(dirdest, sourceInfo.Name()))
+		return
 	}
 
 	_, err = os.Stat(dirdest)
 	if os.IsNotExist(err) {
-		err = os.Mkdir(dirdest, source_info.Mode())
+		err = os.Mkdir(dirdest, sourceInfo.Mode())
 		if err != nil {
 			return
 		}
@@ -49,11 +53,11 @@ func copy_dir(dirsource, dirdest string) (err error) {
 	}
 
 	for _, file := range struktura {
-		source_pateka := filepath.Join(dirsource, file.Name())
-		dest_pateka := filepath.Join(dirdest, file.Name())
+		sourcePateka := filepath.Join(dirsource, file.Name())
+		destPateka := filepath.Join(dirdest, file.Name())
 
 		if file.IsDir() {
-			err = copy_dir(source_pateka, dest_pateka)
+			err = copyDir(sourcePateka, destPateka)
 			if err != nil {
 				return
 			}
@@ -62,47 +66,55 @@ func copy_dir(dirsource, dirdest string) (err error) {
 				fmt.Println("Shortcut-ot ", file.Name(), " ne se kopira")
 				continue
 			}
-			err = copy_file(source_pateka, dest_pateka)
+			err = copyFile(sourcePateka, destPateka)
 			if err != nil {
 				return
 			}
 		}
 	}
+
 	return
 }
 
-func copy_file(src, dst string) (err error) {
-	source_file, err := os.Open(src)
-	defer source_file.Close()
+func copyFile(src, dst string) (err error) {
+	sourceFile, err := os.Open(src)
+	defer sourceFile.Close()
 	if err != nil {
 		return
 	}
-	dest_file, err := os.Create(dst)
+
+	destFile, err := os.Create(dst)
 	if err != nil {
 		return
 	}
+
 	defer func() {
-		if e := dest_file.Close(); e != nil {
+		if e := destFile.Close(); e != nil {
 			err = e
 		}
 	}()
+
 	fmt.Printf("Se kopira: %s ==> %s       ", src, dst)
-	_, err = io.Copy(dest_file, source_file)
+	_, err = io.Copy(destFile, sourceFile)
 	fmt.Printf("Zavrseno kopiranje\n")
 	if err != nil {
 		return
 	}
-	err = dest_file.Sync()
+
+	err = destFile.Sync()
 	if err != nil {
 		return
 	}
-	source_info, err := os.Stat(src)
+
+	sourceInfo, err := os.Stat(src)
 	if err != nil {
 		return
 	}
-	err = os.Chmod(dst, source_info.Mode())
+
+	err = os.Chmod(dst, sourceInfo.Mode())
 	if err != nil {
 		return
 	}
+
 	return
 }
