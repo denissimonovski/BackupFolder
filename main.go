@@ -94,9 +94,9 @@ func copyFile(src, dst string) (err error) {
 		}
 	}()
 
-	fmt.Printf("Se kopira: %s ==> %s       ", src, dst)
+	fmt.Printf("%-70s %s %-70s %s", src, "==>",dst,"Se kopira...")
 	_, err = io.Copy(destFile, sourceFile)
-	fmt.Printf("Zavrseno kopiranje\n")
+	fmt.Printf("%s","Zavrseno\n")
 	if err != nil {
 		return
 	}
