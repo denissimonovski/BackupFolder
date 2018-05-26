@@ -17,10 +17,10 @@ func main() {
 	fmt.Println("Vnesi destinaciski direktorium")
 	fmt.Scan(&dest)
 
-	cistSource := filepath.Clean(source)
-	cistDest := filepath.Clean(dest)
+	source = filepath.Clean(source)
+	dest = filepath.Clean(dest)
 
-	err := copyDir(cistSource, cistDest)
+	err := copyDir(source, dest)
 	if err != nil {
 		fmt.Println(err)
 	}
