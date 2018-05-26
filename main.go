@@ -6,25 +6,39 @@ import (
 	"path/filepath"
 	"io/ioutil"
 	"io"
+	"strings"
 	"bufio"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func main() {
 	var source, dest string
+	var width int
 
-	fmt.Println("Vnesi source direktorium")
+	fmt.Println("Vnesi source folder")
 	fmt.Scan(&source)
-	fmt.Println("Vnesi destinaciski direktorium")
+	fmt.Println("Vnesi destinaciski folder")
 	fmt.Scan(&dest)
 
 	source = filepath.Clean(source)
 	dest = filepath.Clean(dest)
 
+	if terminal.IsTerminal(int(os.Stdout.Fd())) {
+		width, _, _ = terminal.GetSize(int(os.Stdout.Fd()))
+	}
+	fmt.Print(strings.Repeat("#", width))
+	fmt.Println("Fajlovi za kopiranje")
+	fmt.Print(strings.Repeat("#", width))
 	err := copyDir(source, dest)
 	if err != nil {
 		fmt.Println(err)
 	}
 
+	if terminal.IsTerminal(int(os.Stdout.Fd())) {
+		width, _, _ = terminal.GetSize(int(os.Stdout.Fd()))
+	}
+
+	fmt.Print(strings.Repeat("#", width))
 	fmt.Print("Pritisni 'Enter' za kraj...")
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
@@ -94,9 +108,9 @@ func copyFile(src, dst string) (err error) {
 		}
 	}()
 
-	fmt.Printf("%-70s %s %-70s %s", src, "==>",dst,"Se kopira...")
+	fmt.Printf("%-70s %s %-70s %s", src, "==>", dst, "Se kopira...")
 	_, err = io.Copy(destFile, sourceFile)
-	fmt.Printf("%s","Zavrseno\n")
+	fmt.Printf("%s", "Zavrseno\n")
 	if err != nil {
 		return
 	}
