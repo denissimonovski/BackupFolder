@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"io/ioutil"
 	"io"
+	"bufio"
 )
 
 func main() {
@@ -23,7 +24,8 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("Zavrseno kopiranje")
+	fmt.Print("Pritisni 'Enter' za kraj...")
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
 
 func copyDir(dirsource, dirdest string) (err error) {
