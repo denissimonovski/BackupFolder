@@ -24,14 +24,12 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	fmt.Print("Pritisni 'Enter' za kraj...")
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
 
 func copyDir(dirsource, dirdest string) (err error) {
-	dirsource = filepath.Clean(dirsource)
-	dirdest = filepath.Clean(dirdest)
-
 	sourceInfo, err := os.Stat(dirsource)
 	if err != nil {
 		fmt.Println(err)
