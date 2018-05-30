@@ -38,7 +38,7 @@ func main() {
 		if terminal.IsTerminal(int(os.Stdout.Fd())) {
 			width, _, _ = terminal.GetSize(int(os.Stdout.Fd()))
 		}
-		formatString <- "%-" + strconv.Itoa(int((width-20)/2)-1) + "s%s%-" + strconv.Itoa(int((width-20)/2)-2) + "s%s"
+		formatString <- "%-" + strconv.Itoa(int((width-21)/2)-1) + "s%s%-" + strconv.Itoa(int((width-21)/2)-2) + "s%s"
 	}()
 
 	fmt.Println("Vnesi source folder")
