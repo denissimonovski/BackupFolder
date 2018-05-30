@@ -41,7 +41,7 @@ func main() {
 
 	fmt.Println("Vnesi source folder")
 	fmt.Scan(&source)
-	
+
 	go func() {
 		if terminal.IsTerminal(int(os.Stdout.Fd())) {
 			width, _, _ = terminal.GetSize(int(os.Stdout.Fd()))
