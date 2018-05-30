@@ -106,7 +106,7 @@ func copyDir(dirsource, dirdest, format string, osnumber int) (err error) {
 			}
 		} else {
 			if strings.HasSuffix(file.Name(), ".lnk") || file.Mode()&os.ModeSymlink == os.ModeSymlink {
-				fmt.Println("Shortcut-ot ", file.Name(), " ne se kopira")
+				fmt.Println("Shortcut-ot", file.Name(), "ne se kopira")
 				continue
 			}
 			err = copyFile(sourcePateka, destPateka, format, osnumber)
