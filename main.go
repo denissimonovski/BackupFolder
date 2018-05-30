@@ -38,6 +38,10 @@ func main() {
 			osBroj <- 1
 		}
 	}()
+
+	fmt.Println("Vnesi source folder")
+	fmt.Scan(&source)
+	
 	go func() {
 		if terminal.IsTerminal(int(os.Stdout.Fd())) {
 			width, _, _ = terminal.GetSize(int(os.Stdout.Fd()))
@@ -45,8 +49,6 @@ func main() {
 		formatString <- "%-" + strconv.Itoa(int((width-21)/2)-1) + "s%s%-" + strconv.Itoa(int((width-21)/2)-2) + "s%s"
 	}()
 
-	fmt.Println("Vnesi source folder")
-	fmt.Scan(&source)
 	fmt.Println("Vnesi destinaciski folder")
 	fmt.Scan(&dest)
 
