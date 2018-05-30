@@ -46,7 +46,8 @@ func main() {
 		if terminal.IsTerminal(int(os.Stdout.Fd())) {
 			width, _, _ = terminal.GetSize(int(os.Stdout.Fd()))
 		}
-		formatString <- "%-" + strconv.Itoa(int((width-21)/2)-1) + "s%s%-" + strconv.Itoa(int((width-21)/2)-2) + "s%s"
+		formatString <- "%-" + strconv.Itoa(int((width-21)/2)-1) +
+			"s%s%-" + strconv.Itoa(int((width-21)/2)-2) + "s%s"
 	}()
 
 	fmt.Println("Vnesi destinaciski folder")
@@ -80,7 +81,8 @@ func copyDir(dirsource, dirdest, format string, osnumber int) (err error) {
 		fmt.Println(err)
 	}
 	if !sourceInfo.IsDir() {
-		err = copyFile(dirsource, filepath.Join(dirdest, sourceInfo.Name()), format, osnumber)
+		err = copyFile(dirsource, filepath.Join(dirdest,
+			sourceInfo.Name()), format, osnumber)
 		return
 	}
 
@@ -107,7 +109,8 @@ func copyDir(dirsource, dirdest, format string, osnumber int) (err error) {
 				return
 			}
 		} else {
-			if strings.HasSuffix(file.Name(), ".lnk") || file.Mode()&os.ModeSymlink == os.ModeSymlink {
+			if strings.HasSuffix(file.Name(), ".lnk") ||
+				file.Mode()&os.ModeSymlink == os.ModeSymlink {
 				fmt.Println("Shortcut-ot", file.Name(), "ne se kopira")
 				continue
 			}
