@@ -9,11 +9,31 @@ import (
 	"strings"
 	"bufio"
 	"golang.org/x/crypto/ssh/terminal"
+	"regexp"
+	"runtime"
+	"os/exec"
+	"strconv"
 )
 
 func main() {
 	var source, dest string
 	var width int
+	c := make(chan int)
+
+	go func() {
+		if runtime.GOOS == "windows" {
+			komanda, err := exec.Command("systeminfo.exe").Output()
+			if err != nil {
+				fmt.Println(err)
+			}
+			reg := regexp.MustCompile(`OS Name: *Microsoft Windows (\d{1,2})`)
+			najdi := reg.FindAllStringSubmatch(string(komanda), -1)
+			broj, _ := strconv.Atoi(najdi[0][1])
+			c <- broj
+		} else {
+			c <- 10
+		}
+	}()
 
 	fmt.Println("Vnesi source folder")
 	fmt.Scan(&source)
@@ -29,7 +49,8 @@ func main() {
 	fmt.Print(strings.Repeat("#", width))
 	fmt.Println("Fajlovi za kopiranje")
 	fmt.Print(strings.Repeat("#", width))
-	err := copyDir(source, dest)
+	osnumber := <-c
+	err := copyDir(source, dest, osnumber)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -41,15 +62,16 @@ func main() {
 	fmt.Print(strings.Repeat("#", width))
 	fmt.Print("Pritisni 'Enter' za kraj...")
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
 
-func copyDir(dirsource, dirdest string) (err error) {
+func copyDir(dirsource, dirdest string, osnumber int) (err error) {
 	sourceInfo, err := os.Stat(dirsource)
 	if err != nil {
 		fmt.Println(err)
 	}
 	if !sourceInfo.IsDir() {
-		err = copyFile(dirsource, filepath.Join(dirdest, sourceInfo.Name()))
+		err = copyFile(dirsource, filepath.Join(dirdest, sourceInfo.Name()), osnumber)
 		return
 	}
 
@@ -71,18 +93,25 @@ func copyDir(dirsource, dirdest string) (err error) {
 		destPateka := filepath.Join(dirdest, file.Name())
 
 		if file.IsDir() {
-			err = copyDir(sourcePateka, destPateka)
+			err = copyDir(sourcePateka, destPateka, osnumber)
 			if err != nil {
 				return
 			}
 		} else {
-			if file.Mode()&os.ModeSymlink == os.ModeSymlink {
-				fmt.Println("Shortcut-ot ", file.Name(), " ne se kopira")
-				continue
-			}
-			err = copyFile(sourcePateka, destPateka)
-			if err != nil {
-				return
+			if runtime.GOOS == "windows" {
+				if strings.HasSuffix(file.Name(), ".lnk") {
+					fmt.Println("Shortcut-ot ", file.Name(), " ne se kopira")
+					continue
+				}
+				err = copyFile(sourcePateka, destPateka, osnumber)
+				if err != nil {
+					return
+				}
+			} else {
+				if file.Mode()&os.ModeSymlink == os.ModeSymlink {
+					fmt.Println("Shortcut-ot ", file.Name(), " ne se kopira")
+					continue
+				}
 			}
 		}
 	}
@@ -90,7 +119,9 @@ func copyDir(dirsource, dirdest string) (err error) {
 	return
 }
 
-func copyFile(src, dst string) (err error) {
+func copyFile(src, dst string, osnumber int) (err error) {
+	var ime []string
+	var folderime string
 	sourceFile, err := os.Open(src)
 	defer sourceFile.Close()
 	if err != nil {
@@ -108,7 +139,13 @@ func copyFile(src, dst string) (err error) {
 		}
 	}()
 
-	fmt.Printf("%-70s %s %-70s %s", src, "==>", dst, "Se kopira...")
+	ime = strings.Split(src, "\\")
+	folderime = ime[len(ime)-2] + "\\" + ime[len(ime)-1]
+	if osnumber > 7 {
+		fmt.Printf("%-70s %s %-70s %s", folderime, "==>", dst, "Se kopira...")
+	} else {
+		fmt.Printf("%-59s %s", folderime, "Se kopira...")
+	}
 	_, err = io.Copy(destFile, sourceFile)
 	fmt.Printf("%s", "Zavrseno\n")
 	if err != nil {
