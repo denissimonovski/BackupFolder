@@ -15,7 +15,7 @@ import (
 	"strconv"
 )
 
-func init()  {
+func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 }
 
@@ -35,7 +35,7 @@ func main() {
 			broj, _ := strconv.Atoi(najdi[0][1])
 			osBroj <- broj
 		} else {
-			osBroj <- 10
+			osBroj <- 1
 		}
 	}()
 	go func() {
@@ -69,7 +69,6 @@ func main() {
 
 	fmt.Print(strings.Repeat("#", width))
 	fmt.Print("Pritisni 'Enter' za kraj...")
-	bufio.NewReader(os.Stdin).ReadBytes('\n')
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
 
@@ -122,7 +121,7 @@ func copyDir(dirsource, dirdest, format string, osnumber int) (err error) {
 
 func copyFile(src, dst, format string, osnumber int) (err error) {
 	var ime1, ime2 []string
-	var folderIme1, folderIme2 string
+	var folderIme1, folderIme2, separator string
 	sourceFile, err := os.Open(src)
 	defer sourceFile.Close()
 	if err != nil {
@@ -140,14 +139,23 @@ func copyFile(src, dst, format string, osnumber int) (err error) {
 		}
 	}()
 
-	ime1 = strings.Split(src, "\\")
-	ime2 = strings.Split(dst, "\\")
-	folderIme1 = ime1[len(ime1)-2] + "\\" + ime1[len(ime1)-1]
-	folderIme2 = ime2[len(ime2)-2] + "\\" + ime2[len(ime2)-1]
+	if osnumber == 1 {
+		separator = "/"
+	} else {
+		separator = "\\"
+	}
+	ime1 = strings.Split(src, separator)
+	ime2 = strings.Split(dst, separator)
+	folderIme1 = ime1[len(ime1)-2] + separator + ime1[len(ime1)-1]
+	folderIme2 = ime2[len(ime2)-2] + separator + ime2[len(ime2)-1]
 	if osnumber > 7 {
 		fmt.Printf(format, folderIme1, "==>", folderIme2, "Se kopira...")
 	} else {
-		fmt.Printf("%-59s %s", folderIme1, "Se kopira...")
+		if osnumber == 1 {
+			fmt.Printf(format, folderIme1, "==>", folderIme2, "Se kopira...")
+		} else {
+			fmt.Printf("%-59s %s", folderIme1, "Se kopira...")
+		}
 	}
 	_, err = io.Copy(destFile, sourceFile)
 	fmt.Printf("%s", "Zavrseno\n")
