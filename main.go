@@ -15,6 +15,10 @@ import (
 	"strconv"
 )
 
+func init()  {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+}
+
 func main() {
 	var source, dest string
 	var width int
